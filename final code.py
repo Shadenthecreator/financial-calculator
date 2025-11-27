@@ -126,7 +126,7 @@ st.markdown("#### حاسبة الفوائد والقسط الشهري")
 st.markdown(
     """
     <div style="text-align:center; background-color:#EAF4FF; padding:10px; border-radius:8px;">
-          طالبات د.ريم القثامي | مقرر برمجة رياضية
+          {CF1} طالبات د.ريم القثامي | مقرر برمجة رياضية
     </div>
     """,
     unsafe_allow_html=True
