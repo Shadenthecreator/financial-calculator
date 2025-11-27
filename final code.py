@@ -29,7 +29,7 @@ def load_css(file_name: str):
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     except FileNotFoundError:
         # في حال عدم وجود الملف، نستخدم أنماط افتراضية
-        st.warning("ملف style.css غير موجود. سيتم استخدام الأنماط الافتراضية.")
+        st.warning("ملف final style.css غير موجود. سيتم استخدام الأنماط الافتراضية.")
         st.markdown("""
         <style>
         /* أنماط افتراضية بسيطة في حال عدم وجود ملف CSS */
@@ -39,7 +39,7 @@ def load_css(file_name: str):
         """, unsafe_allow_html=True)
 
 # تحميل الأنماط من ملف style.css
-load_css("style.css")
+load_css("final style.css")
 
 # --------------------------------
 # 2. الدوال الرياضية والمالية الأساسية
