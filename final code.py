@@ -1,0 +1,334 @@
+# -*- coding: utf-8 -*-
+import streamlit as st
+import math
+import pandas as pd
+from typing import Callable, Dict, Tuple, List
+
+# --------------------------------
+# إعداد الصفحة والخطوط (كما في الكود المحسّن)
+# --------------------------------
+st.set_page_config(page_title="الحاسبة المالية المتقدمة", layout="centered")
+
+# --- تحميل CSS --- 
+def load_css(file_name):
+    try:
+        # تأكد من أن ملف style.css موجود في نفس مجلد app.py
+        with open(file_name) as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    except FileNotFoundError:
+        # في حال عدم وجود الملف، نستخدم أنماط افتراضية
+        st.markdown("""
+        <style>
+        div.stButton > button:nth-child(2) { background-color: #8B0000; color: white; }
+        div.stButton > button:first-child { background-color: #0044CC; color: white; }
+        </style>
+        """, unsafe_allow_html=True)
+
+load_css("style.css")
+
+# --------------------------------
+# دوال الحساب (مع دالة جدول الاستهلاك - Amortization Schedule)
+# --------------------------------
+def fmt(x: float) -> str:
+    """تنسيق الرقم كعملة مع فواصل."""
+    return f"{x:,.2f}"
+
+def simple_interest(P: float, r: float, t_months: int) -> Tuple[float, float]:
+    t_years = t_months / 12.0
+    A = P * (1 + r * t_years)
+    I = A - P
+    return A, I
+
+def compound_interest(P: float, r: float, t_months: int, m: int) -> Tuple[float, float]:
+    t_years = t_months / 12.0
+    A = P * ((1 + r / m) ** (m * t_years))
+    I = A - P
+    return A, I
+
+def continuous_compound(P: float, r: float, t_months: int) -> Tuple[float, float]:
+    t_years = t_months / 12.0
+    A = P * math.exp(r * t_years)
+    I = A - P
+    return A, I
+
+def monthly_payment(P: float, r: float, t_months: int) -> float:
+    """تحسب القسط الشهري."""
+    if t_months == 0:
+        return P
+    i = r / 12.0
+    if i == 0:
+        return P / t_months
+    # صيغة القسط الشهري (PMT)
+    return P * i / (1 - (1 + i) ** -t_months)
+
+def amortization_schedule(P: float, r: float, t_months: int) -> pd.DataFrame:
+    """
+    تنشئ جدول استهلاك القرض (Amortization Schedule).
+    هذا يمثل نمذجة رياضية متسلسلة.
+    """
+    monthly_rate = r / 12.0
+    payment = monthly_payment(P, r, t_months)
+    
+    # قائمة لتخزين بيانات الجدول
+    schedule_data = []
+    
+    # الرصيد المتبقي يبدأ بمبلغ القرض
+    remaining_balance = P
+    
+    # حلقة تكرارية (Loop) تمثل التحليل العددي شهراً بشهر
+    for month in range(1, t_months + 1):
+        # 1. حساب الفائدة لهذا الشهر
+        interest_paid = remaining_balance * monthly_rate
+        
+        # 2. حساب أصل الدين المسدد
+        principal_paid = payment - interest_paid
+        
+        # 3. تحديث الرصيد المتبقي
+        remaining_balance -= principal_paid
+        
+        # التأكد من أن الرصيد لا يصبح سالباً بسبب تقريب الأرقام
+        if remaining_balance < 0:
+            principal_paid += remaining_balance # تعديل أصل الدين في الشهر الأخير
+            remaining_balance = 0
+        
+        # إضافة بيانات الشهر إلى القائمة
+        schedule_data.append({
+            "الشهر": month,
+            "القسط الشهري": payment,
+            "الفائدة المدفوعة": interest_paid,
+            "أصل الدين المسدد": principal_paid,
+            "الرصيد المتبقي": remaining_balance
+        })
+        
+        # إذا وصل الرصيد إلى الصفر، نوقف الحلقة
+        if remaining_balance == 0:
+            break
+            
+    # إنشاء DataFrame
+    df = pd.DataFrame(schedule_data)
+    
+    # تنسيق الأعمدة
+    for col in ["القسط الشهري", "الفائدة المدفوعة", "أصل الدين المسدد", "الرصيد المتبقي"]:
+        df[col] = df[col].apply(lambda x: round(x, 2))
+        
+    return df
+
+# --------------------------------
+# بنية العمليات (تحديث القسط الشهري)
+# --------------------------------
+CALCULATION_MODES = {
+    "الفائدة البسيطة": {
+        "description": "تحسب الفائدة على الأصل فقط.",
+        "func": simple_interest,
+        "params": ["P", "r", "t_months"],
+        "result_labels": ("الفائدة", "المبلغ النهائي")
+    },
+    "الفائدة المركبة (متقطعة)": {
+        "description": "تُضاف الفائدة للأصل على دفعات خلال السنة.",
+        "func": compound_interest,
+        "params": ["P", "r", "t_months", "m"],
+        "result_labels": ("الفائدة", "المبلغ النهائي")
+    },
+    "الفائدة المركبة المستمرة": {
+        "description": "الفائدة تُحسب بشكل مستمر باستخدام الأسس.",
+        "func": continuous_compound,
+        "params": ["P", "r", "t_months"],
+        "result_labels": ("الفائدة", "المبلغ النهائي")
+    },
+    "القسط الشهري للقرض (تحليل الاستهلاك)": { # تم تغيير الاسم
+        "description": "يحسب القسط الشهري ويقدم جدول استهلاك تفصيلي للقرض.",
+        "func": monthly_payment,
+        "params": ["P", "r", "t_months"],
+        "result_labels": ("القسط الشهري",)
+    }
+}
+
+# --------------------------------
+# واجهة المستخدم الرئيسية
+# --------------------------------
+st.title("الحاسبة المالية المتقدمة (مشروع البرمجة الرياضية)")
+
+# حل مشكلة التضليل: إخلاء مسؤولية واضح
+
+
+# حل مشكلة الشفافية: عرض المعادلات
+
+
+choice = st.selectbox("اختر العملية:", list(CALCULATION_MODES.keys()))
+mode_config = CALCULATION_MODES[choice]
+st.caption(mode_config["description"])
+
+# ... (حقول الإدخال) ...
+inputs: Dict[str, float | None] = {}
+inputs["P"] = st.number_input("المبلغ (P):", min_value=0.0, format="%.2f", step=1.0, key="P")
+inputs["r_pct"] = st.number_input("النسبة السنوية (%):", min_value=0.0, format="%.2f", step=1.0, key="r_pct")
+inputs["t_months"] = st.number_input("المدة (بالأشهر):", min_value=1, step=1, format="%d", key="t_months")
+
+if "m" in mode_config["params"]:
+    inputs["m"] = st.number_input("عدد الدفعات في السنة:", min_value=1, step=1, format="%d", key="m")
+
+def clear_fields():
+    for key in ["P", "r_pct", "t_months", "m"]:
+        if key in st.session_state:
+            st.session_state[key] = 0.0 if key != 't_months' and key != 'm' else 1
+
+col1, col2 = st.columns(2)
+
+with col1:
+    if st.button("احسب", type="primary"):
+        P = inputs["P"]
+        r_pct = inputs["r_pct"]
+        t_months = int(inputs["t_months"])
+        m_val = int(inputs.get("m", 1))
+
+        if P <= 0 or r_pct < 0:
+            st.error("يرجى إدخال قيم موجبة للمبلغ والنسبة.")
+        else:
+            r = r_pct / 100.0
+            
+            func = mode_config["func"]
+            params = {"P": P, "r": r, "t_months": t_months}
+            if "m" in mode_config["params"]:
+                params["m"] = m_val
+
+            result = func(**params)
+
+            # عرض النتائج
+            if isinstance(result, tuple):
+                # تعديل: استخدام st.columns لعرض النتائج جنباً إلى جنب
+                cols = st.columns(len(result))
+                for i, (label, value) in enumerate(zip(mode_config["result_labels"], result)):
+                    with cols[i]:
+                        st.metric(label=label, value=fmt(value))
+            elif choice == "القسط الشهري للقرض (تحليل الاستهلاك)":
+                # في حالة القسط الشهري، النتيجة هي قيمة واحدة وليست tuple
+                st.metric(label=mode_config["result_labels"][0], value=fmt(result))
+
+            # --------------------------------
+            # عرض جدول الاستهلاك إذا كانت العملية هي القرض
+            # --------------------------------
+            if choice == "القسط الشهري للقرض (تحليل الاستهلاك)":
+                st.subheader("جدول استهلاك القرض (Amortization Schedule)")
+                
+                # استدعاء الدالة الجديدة
+                amort_df = amortization_schedule(P, r, t_months)
+                
+                # عرض الجدول
+                st.dataframe(amort_df, use_container_width=True)
+                
+                # عرض الرسم البياني لتوزيع القسط
+                st.subheader("توزيع القسط الشهري (فائدة مقابل أصل)")
+                
+                # إنشاء DataFrame للرسم البياني
+                chart_data = amort_df[["الشهر", "الفائدة المدفوعة", "أصل الدين المسدد"]]
+                chart_data = chart_data.set_index("الشهر")
+                
+                # استخدام st.bar_chart لبيان التوزيع
+                st.bar_chart(chart_data)
+                
+                # عرض الرسم البياني للرصيد المتبقي
+                st.subheader("الرصيد المتبقي شهراً بشهر")
+                balance_chart = amort_df[["الشهر", "الرصيد المتبقي"]].set_index("الشهر")
+                st.line_chart(balance_chart)
+                
+            else:
+                # منطق الرسم البياني للفوائد (باستخدام st.line_chart)
+                st.subheader("الرسم البياني للنمو")
+                months_range = list(range(1, t_months + 1))
+                values: List[float] = []
+
+                if choice == "الفائدة البسيطة":
+                    values = [simple_interest(P, r, m)[0] for m in months_range]
+                elif choice == "الفائدة المركبة (متقطعة)":
+                    values = [compound_interest(P, r, m, m_val)[0] for m in months_range]
+                elif choice == "الفائدة المركبة المستمرة":
+                    values = [continuous_compound(P, r, m)[0] for m in months_range]
+
+                chart_data = pd.DataFrame({
+                    "الشهر": months_range,
+                    "القيمة المتراكمة": values
+                })
+                
+                st.line_chart(chart_data.set_index("الشهر"))
+
+# --------------------------------
+# قسم الحقوق الأكاديمية والملاحظات (في أسفل التطبيق)
+# --------------------------------
+st.markdown("---")
+
+# الملاحظة (إخلاء المسؤولية)
+st.info("💡 ملاحظة: هذه النتائج هي تقديرات رياضية مبنية على المدخلات. للحصول على عرض مالي رسمي، يرجى استشارة مستشار مالي مختص.")
+
+# المعادلات الرياضية (الشفافية)
+with st.expander("المنهجية والمعادلات الرياضية المستخدمة"):
+    st.markdown(r"""
+    **1. الفائدة البسيطة (Simple Interest):**
+    $$ A = P(1 + rt) $$
+    **2. الفائدة المركبة (Compound Interest):**
+    $$ A = P \left(1 + \frac{r}{m}\right)^{mt} $$
+    **3. الفائدة المركبة المستمرة (Continuous Compound Interest):**
+    $$ A = P e^{rt} $$
+    **4. القسط الشهري للقرض (Loan Payment - PMT):**
+    $$ PMT = \frac{P \cdot i}{1 - (1 + i)^{-n}} $$
+    حيث: $i = r/12$ (معدل الفائدة الشهري)، $n$ هي عدد الأشهر.
+    """)
+
+# قسم الحقوق الأكاديمية (Footer)
+st.markdown(
+    """
+    <div class="footer-academic">
+        طالبات د.ريم القثامي | مقرر برمجة رياضية {CF1}
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+with col2:
+    st.button("مسح الحقول", on_click=clear_fields)
+# --------------------------------
+st.markdown("---")
+
+# حل مشكلة التضليل: إخلاء مسؤولية واضح (تم نقله للأسفل)
+st.info("💡 ملاحظة: هذه النتائج هي تقديرات رياضية مبنية على المدخلات. للحصول على عرض مالي رسمي، يرجى استشارة مستشار مالي مختص.")
+
+# حل مشكلة الشفافية: عرض المعادلات (تم نقله للأسفل)
+with st.expander("المنهجية والمعادلات الرياضية المستخدمة"):
+    st.markdown("""
+    **1. القسط الشهري للقرض (Amortization):**
+    يتم حسابه باستخدام معادلة القسط الثابت:
+    $$
+    M = P \\frac{i(1+i)^n}{(1+i)^n - 1}
+    $$
+    حيث:
+    *   $M$: القسط الشهري
+    *   $P$: أصل القرض
+    *   $i$: سعر الفائدة الشهري (السنوي مقسوم على 12)
+    *   $n$: عدد الأشهر الكلي
+
+    **2. الفائدة المركبة (Compound Interest):**
+    $$
+    A = P \\left(1 + \\frac{r}{m}\\right)^{mt}
+    $$
+    حيث:
+    *   $A$: المبلغ النهائي
+    *   $P$: أصل المبلغ
+    *   $r$: سعر الفائدة السنوي
+    *   $m$: عدد مرات إضافة الفائدة في السنة
+    *   $t$: المدة بالسنوات
+
+    **3. الفائدة المركبة المستمرة (Continuous Compounding):**
+    $$
+    A = P e^{rt}
+    $$
+    حيث:
+    *   $A$: المبلغ النهائي
+    *   $P$: أصل المبلغ
+    *   $e$: الثابت الرياضي (قاعدة اللوغاريتم الطبيعي)
+    *   $r$: سعر الفائدة السنوي
+    *   $t$: المدة بالسنوات
+
+    **4. الفائدة البسيطة (Simple Interest):**
+    $$
+    A = P(1 + rt)
+    $$
+    """)
