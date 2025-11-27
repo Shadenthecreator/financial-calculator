@@ -17,7 +17,7 @@ from typing import Callable, Dict, Tuple, List
 # --- التعديل: إضافة أيقونة الصفحة (Favicon) وتغيير العنوان ---
 st.set_page_config(
     page_title="حاسبة الفوائد والقسط الشهري",
-    page_icon="icon.png",  # <-- استخدام ملف icon.png كأيقونة للمتصفح
+    page_icon="llogo.png",  # <-- استخدام ملف llogo.png كأيقونة للمتصفح
     layout="centered",
     initial_sidebar_state="collapsed"
 )
