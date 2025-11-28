@@ -123,14 +123,37 @@ except FileNotFoundError:
 st.markdown("#### حاسبة الفوائد والقسط الشهري")
 
 # 3. وضع المربع الأزرق تحت العنوان مباشرة
+
 st.markdown(
     """
-    <div style="text-align:center; background-color:#EAF4FF; padding:10px; border-radius:8px;">
-          {CF1} طالبات د.ريم القثامي | مقرر برمجة رياضية
+    <style>
+    .footer-academic {
+        text-align: center;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 16px;
+    }
+    @media (prefers-color-scheme: dark) {
+        .footer-academic {
+            background-color: #333333;
+            color: #FFFFFF;
+        }
+    }
+    @media (prefers-color-scheme: light) {
+        .footer-academic {
+            background-color: #EAF4FF;
+            color: #000000;
+        }
+    }
+    </style>
+    <div class="footer-academic">
+        💡 طالبات د.ريم القثامي | مقرر برمجة رياضية
     </div>
     """,
     unsafe_allow_html=True
 )
+
 
 # --- نهاية التعديلات ---
 
