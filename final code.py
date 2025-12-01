@@ -20,7 +20,11 @@ st.set_page_config(
     layout="centered",
     initial_sidebar_state="collapsed" # Shaden Al-Ghamdi
 )
-
+# --- إضافة كود التحقق من جوجل ---
+st.markdown(
+    '<meta name="google-site-verification" content="Dt6IB31gKNtjpGLr_gODgn8mCulRreKzrS7mXdTzJxU" />',
+    unsafe_allow_html=True
+)
 
 def load_css(file_name: str):
     """تحميل ملف الأنماط CSS خارجي وتطبيقه على التطبيق."""
