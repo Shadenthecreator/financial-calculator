@@ -18,10 +18,9 @@ st.set_page_config(
     page_title="الحاسبة المالية المتقدمة | فوائد وقروض",
     page_icon="llogo.png",
     layout="centered",
-    initial_sidebar_state="collapsed", # Shaden Al-Ghamdi
-    # إضافة كود التحقق من جوجل هنا
-    meta_tags=[{"name": "google-site-verification", "content": "Dt6IB31gKNtjpGLr_gODgn8mCulRreKzrS7mXdTzJxU"}]
+    initial_sidebar_state="collapsed" # Shaden Al-Ghamdi
 )
+
 
 def load_css(file_name: str):
     """تحميل ملف الأنماط CSS خارجي وتطبيقه على التطبيق."""
