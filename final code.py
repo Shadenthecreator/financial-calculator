@@ -20,7 +20,7 @@ st.set_page_config(
     layout="centered",
     initial_sidebar_state="collapsed", # Shaden Al-Ghamdi
     # إضافة كود التحقق من جوجل هنا
-    meta_tags=[{"name": "google-site-verification", "content": <meta name="google-site-verification" content="Dt6IB31gKNtjpGLr_gODgn8mCulRreKzrS7mXdTzJxU" />}]
+    meta_tags=[{"name": "google-site-verification", "content": "Dt6IB31gKNtjpGLr_gODgn8mCulRreKzrS7mXdTzJxU"}]
 )
 
 def load_css(file_name: str):
