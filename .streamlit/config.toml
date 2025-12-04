@@ -1,3 +1,0 @@
-[server]
-# هذا السطر يخبر ستريمليت بالسماح بالوصول إلى ملفات HTML 
-staticFilePaths = ["google5768d177354daf1e"]
