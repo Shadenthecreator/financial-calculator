@@ -10,6 +10,23 @@ import math
 import pandas as pd
 from typing import Callable, Dict, Tuple, List
 
+# -------------------------------------------------------------------
+# الخطوة 1: إضافة كود تتبع Google Analytics لإثبات الملكية و SEO
+# -------------------------------------------------------------------
+
+# !! هام جداً: بمعرّف القياس  Google Analytics
+GA_MEASUREMENT_ID = "G-NJML7HP1M9"  
+
+# هذا الكود يقوم بحقن شفرة التتبع في رأس الصفحة
+st.markdown(f"""
+    <script async src="https://www.googletagmanager.com/gtag/js?id={GA_MEASUREMENT_ID}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag( ){{dataLayer.push(arguments);}}
+      gtag('js', new Date());
+      gtag('config', '{GA_MEASUREMENT_ID}');
+    </script>
+    """, unsafe_allow_html=True)
 # --------------------------------
 # 1. إعدادات الصفحة وتحميل الأنماط (CSS)
 # --------------------------------
