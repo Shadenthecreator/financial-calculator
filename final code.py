@@ -16,7 +16,7 @@ from typing import Callable, Dict, Tuple, List
 # إعدادات الصفحة الرئيسية وتحميل ملف الأنماط (CSS)
 # --------------------------------
 st.set_page_config(
-    page_title="الحاسبة المالية المتقدمة | فوائد وقروض",
+    page_title="الحاسبة المالية | فوائد وقسط شهري",
     page_icon="llogo.png",
     layout="centered",
     initial_sidebar_state="collapsed"
