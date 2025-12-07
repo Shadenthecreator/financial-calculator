@@ -296,7 +296,7 @@ st.markdown(
     }
     </style>
     <div class="footer-academic">
-          طالبات د.ريم القثامي | مقرر برمجة رياضية
+          إشراف د.ريم القثامي | مقرر برمجة رياضية
     </div>
     """,
     unsafe_allow_html=True
