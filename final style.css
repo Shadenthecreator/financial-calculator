@@ -1,39 +1,12 @@
-/*
-    ملف الأنماط (CSS) الاحترافي لتطبيق Streamlit
-    يجمع بين الجمالية وتحسين تجربة المستخدم (UX)
-*/
+/* تخصيص الأنماط لتطبيق Streamlit */
 
 /* --------------------------------
    1. تخصيص الأزرار (Buttons)
    -------------------------------- */
 
-/* تخصيص الزر الرئيسي (الحساب) */
+/* الزر الرئيسي (احسب) */
 div.stButton > button:first-child {
-    background-color: #0044CC; /* أزرق مميز */
-    color: white;
-    border-radius: 8px;
-    padding: 10px 20px;
-    font-size: 16px;
-    font-weight: bold;
-    border: none;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* ظل خفيف */
-    transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease; /* انتقال سلس */
-}
-
-/* تأثير عند مرور المؤشر على زر الحساب */
-div.stButton > button:first-child:hover {
-    background-color: #0055EE; /* أزرق أفتح قليلاً */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* ظل أوضح */
-}
-
-/* تأثير عند النقر على زر الحساب */
-div.stButton > button:first-child:active {
-    transform: translateY(1px); /* إعطاء إحساس بالضغط */
-}
-
-/* تخصيص زر مسح الحقول (Clear) */
-div.stButton > button:nth-child(2) {
-    background-color: #8B0000; /* أحمر داكن (للتنبيه) */
+    background-color: #0044CC;
     color: white;
     border-radius: 8px;
     padding: 10px 20px;
@@ -44,9 +17,33 @@ div.stButton > button:nth-child(2) {
     transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
 }
 
-/* تأثير عند مرور المؤشر على زر المسح */
+/* تأثير عند مرور المؤشر */
+div.stButton > button:first-child:hover {
+    background-color: #0055EE;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* تأثير عند الضغط */
+div.stButton > button:first-child:active {
+    transform: translateY(1px);
+}
+
+/* زر مسح الحقول (Clear) */
+div.stButton > button:nth-child(2) {
+    background-color: #8B0000;
+    color: white;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
+}
+
+/* تأثير عند مرور المؤشر */
 div.stButton > button:nth-child(2):hover {
-    background-color: #A00000; /* أحمر أفتح قليلاً */
+    background-color: #A00000;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
@@ -54,7 +51,7 @@ div.stButton > button:nth-child(2):hover {
    2. تخصيص حقول الإدخال (Input Fields)
    -------------------------------- */
 
-/* تخصيص حقول الإدخال النصية والرقمية */
+/* حقول الإدخال النصية والرقمية */
 div[data-testid="stTextInput"] > div > div > input,
 div[data-testid="stNumberInput"] > div > div > input {
     border-radius: 8px;
@@ -67,48 +64,47 @@ div[data-testid="stNumberInput"] > div > div > input {
 /* تأثير عند التركيز على الحقل (Focus) */
 div[data-testid="stTextInput"] > div > div > input:focus,
 div[data-testid="stNumberInput"] > div > div > input:focus {
-    border-color: #0044CC; /* لون أزرق مميز */
+    border-color: #0044CC;
     box-shadow: 0 0 0 3px rgba(0, 68, 204, 0.3), 0 0 8px rgba(0, 68, 204, 0.2);
-    outline: none; /* إزالة الإطار الافتراضي للمتصفح */
+    outline: none;
 }
 
 /* --------------------------------
    3. تخصيص العناوين والنتائج (Metrics)
    -------------------------------- */
 
-/* تخصيص العنوان الرئيسي */
+/* العنوان الرئيسي */
 h1 {
     color: #0044CC;
     padding-bottom: 0px;
     font-weight: 700;
 }
 
-/* تخصيص العناوين الفرعية */
+/* العناوين الفرعية */
 h3 {
     color: #333333;
     margin-top: 20px;
     font-weight: 600;
 }
 
-/* تخصيص الـ Metrics (النتائج) */
+/* حاوية النتائج (Metric Container) */
 [data-testid="stMetric"] {
     padding: 15px;
     border-radius: 10px;
-    border-left: 5px solid #0044CC; /* خط أزرق مميز */
+    border-left: 5px solid #0044CC;
     box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
 }
 
-/* تخصيص قيمة الـ Metric */
+/* قيمة النتيجة (Metric Value) */
 [data-testid="stMetricValue"] {
     font-size: 1.8rem !important;
     font-weight: 700 !important;
     color: #0044CC !important;
 }
 
-/* حل مشكلة الوضع الليلي (Dark Mode) */
-/* استهداف تسمية الـ Metric (التي تختفي) وتعيين لونها ليتناسب مع الوضع الليلي */
+/* تسمية النتيجة (Metric Label) - لحل مشكلة الوضع الليلي */
 [data-testid="stMetricLabel"] > div {
-    color: var(--text-color) !important; /* استخدام متغير Streamlit للون النص الافتراضي */
+    color: var(--text-color) !important;
 }
 
 /* --------------------------------
@@ -122,10 +118,10 @@ h3 {
 }
 
 /* --------------------------------
-   5. تخصيص لون التحديد عند الخطأ (Error Focus Color)
+   5. تخصيص إطار التركيز العام (Focus Outline)
    -------------------------------- */
 
-/* استهداف إطار التركيز (Focus Outline) العام */
+/* إطار التركيز للعناصر التفاعلية (لتحسين إمكانية الوصول) */
 div[data-testid="stTextInput"] > div > div > input:focus,
 div[data-testid="stNumberInput"] > div > div > input:focus,
 div[data-testid="stSelectbox"] > div > div:focus-within,
@@ -134,7 +130,3 @@ div[data-testid="stSelectbox"] > div > div:focus {
     box-shadow: 0 0 0 3px rgba(0, 68, 204, 0.3), 0 0 8px rgba(0, 68, 204, 0.2) !important;
     outline: none !important;
 }
-
-/* --------------------------------
-   6. تخصيص قسم الحقوق الأكاديمية (Footer) - تم إزالته من الكود واستبداله بـ st.info
-   -------------------------------- */
